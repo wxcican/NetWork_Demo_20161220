@@ -18,6 +18,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 import static android.R.attr.password;
 import static android.R.string.ok;
@@ -46,8 +47,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void register(String username,String password){
+
+        //实例化日志拦截器
+        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+        //设置日志拦截器级别
+        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
         //拿到客户端
-        OkHttpClient okHttpClient = new OkHttpClient();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                //加入日志拦截器
+                .addInterceptor(httpLoggingInterceptor)
+                .build();
 
         //构建请求
         //因为是post请求，所以构建请求体
@@ -67,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         //客户端执行请求->拿到响应
-        okHttpClient.newCall(request).enqueue(new Callback() {
+        Call call = okHttpClient.newCall(request);
+        call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.e("aaa","超时，无网络连接");
