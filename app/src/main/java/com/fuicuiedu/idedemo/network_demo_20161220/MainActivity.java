@@ -53,14 +53,20 @@ public class MainActivity extends AppCompatActivity {
         //设置日志拦截器级别
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
+        //自定义拦截器，用于同一添加bomb必要的头信息
+        BombInterceptor bombInterceptor = new BombInterceptor();
+
         //拿到客户端
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                //加入同一添加头信息的拦截器
+                .addInterceptor(bombInterceptor)
                 //加入日志拦截器
                 .addInterceptor(httpLoggingInterceptor)
                 .build();
 
         //构建请求
         //因为是post请求，所以构建请求体
+
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("username",username);
@@ -86,7 +92,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                Log.e("aaa","请求成功");
+                //是否连接成功
+                if (response.isSuccessful()){
+                    Log.e("aaa","拿到响应");
+                }else{
+                    Log.e("aaa","响应失败，响应码=" + response.code());
+                }
             }
         });
 
