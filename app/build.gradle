@@ -31,4 +31,6 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     //添加日志拦截器
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+    //添加Gson,一个用来生成和解析json数据的第三方库
+    compile 'com.google.code.gson:gson:2.8.0'
 }

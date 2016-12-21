@@ -5,6 +5,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+
+import com.fuicuiedu.idedemo.network_demo_20161220.entity.RegisterResult;
+import com.fuicuiedu.idedemo.network_demo_20161220.entity.User;
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,6 +24,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 import static android.R.attr.password;
@@ -67,14 +74,20 @@ public class MainActivity extends AppCompatActivity {
         //构建请求
         //因为是post请求，所以构建请求体
 
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("username",username);
-            jsonObject.put("password",password);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        RequestBody requestBody = RequestBody.create(null,jsonObject.toString());
+//        final JSONObject jsonObject = new JSONObject();
+//        try {
+//            jsonObject.put("username",username);
+//            jsonObject.put("password",password);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+
+        User user = new User(username, password);
+        //通过Gson将一个user类生成为一个json数据
+        String userJson = new Gson().toJson(user);
+        Log.e("userJson",userJson);
+
+        final RequestBody requestBody = RequestBody.create(null,userJson);
 
         Request request = new Request.Builder()
                 //请求方式（请求体）
@@ -90,11 +103,33 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("aaa","超时，无网络连接");
             }
 
+            //网络连接成功
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                //是否连接成功
+                //是否成功
                 if (response.isSuccessful()){
-                    Log.e("aaa","拿到响应");
+                    //拿到响应体
+                    ResponseBody responseBody = response.body();
+                    //响应体是json格式
+                    String json = responseBody.string();
+                    //通过Gson讲json数据解析成一个实体类
+                    RegisterResult registerResult = new Gson().fromJson(json,RegisterResult.class);
+//                    {
+//                        "createdAt": "2016-12-21 10:36:04",
+//                            "objectId": "8ba8abb9cd",
+//                            "sessionToken": "821bea7740c814b88090ed8ae5a417e9"
+//                    }
+//                    try {
+//                        JSONObject jsonObject = new JSONObject(json);
+//                        registerResult.setCreatedAt(jsonObject.getString("createdAt"));
+//                        registerResult.setObjectId(jsonObject.getString("objectId"));
+//                        registerResult.setSessionToken(jsonObject.getString("sessionToken"));
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+
+                    Log.e("RegisterResult",registerResult.toString());
+
                 }else{
                     Log.e("aaa","响应失败，响应码=" + response.code());
                 }
