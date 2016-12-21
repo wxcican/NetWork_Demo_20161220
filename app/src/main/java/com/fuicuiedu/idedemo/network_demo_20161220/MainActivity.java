@@ -1,10 +1,13 @@
 package com.fuicuiedu.idedemo.network_demo_20161220;
 
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.fuicuiedu.idedemo.network_demo_20161220.entity.RegisterResult;
 import com.fuicuiedu.idedemo.network_demo_20161220.entity.User;
@@ -33,6 +36,14 @@ import static android.R.string.ok;
 public class MainActivity extends AppCompatActivity {
 
     EditText mUserName,mPassword;
+
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Toast.makeText(MainActivity.this, "更新UI", Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,44 +108,70 @@ public class MainActivity extends AppCompatActivity {
 
         //客户端执行请求->拿到响应
         Call call = okHttpClient.newCall(request);
-        call.enqueue(new Callback() {
+        call.enqueue(new UICallBack() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("aaa","超时，无网络连接");
+            public void onFailureInUI(Call call, IOException e) {
+                Toast.makeText(MainActivity.this, "超时或者无网络连接。", Toast.LENGTH_SHORT).show();
             }
 
-            //网络连接成功
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                //是否成功
-                if (response.isSuccessful()){
-                    //拿到响应体
-                    ResponseBody responseBody = response.body();
-                    //响应体是json格式
-                    String json = responseBody.string();
-                    //通过Gson讲json数据解析成一个实体类
-                    RegisterResult registerResult = new Gson().fromJson(json,RegisterResult.class);
-//                    {
-//                        "createdAt": "2016-12-21 10:36:04",
-//                            "objectId": "8ba8abb9cd",
-//                            "sessionToken": "821bea7740c814b88090ed8ae5a417e9"
-//                    }
-//                    try {
-//                        JSONObject jsonObject = new JSONObject(json);
-//                        registerResult.setCreatedAt(jsonObject.getString("createdAt"));
-//                        registerResult.setObjectId(jsonObject.getString("objectId"));
-//                        registerResult.setSessionToken(jsonObject.getString("sessionToken"));
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-
-                    Log.e("RegisterResult",registerResult.toString());
-
-                }else{
-                    Log.e("aaa","响应失败，响应码=" + response.code());
-                }
+            public void onResponseInUI(Call call, String body) {
+                Toast.makeText(MainActivity.this, "注册成功", Toast.LENGTH_SHORT).show();
+                RegisterResult result = new Gson().fromJson(body,RegisterResult.class);
+                Log.e("RegisterResult",result.toString());
             }
         });
+
+
+
+
+
+
+
+
+
+
+
+//        call.enqueue(new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                Log.e("aaa","超时，无网络连接");
+//            }
+//
+//            //网络连接成功
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                //模拟更新UI
+//                handler.sendEmptyMessage(0);
+//                //是否成功
+//                if (response.isSuccessful()){
+//                    //拿到响应体
+//                    ResponseBody responseBody = response.body();
+//                    //响应体是json格式
+//                    String json = responseBody.string();
+//                    //通过Gson讲json数据解析成一个实体类
+//                    RegisterResult registerResult = new Gson().fromJson(json,RegisterResult.class);
+////                    {
+////                        "createdAt": "2016-12-21 10:36:04",
+////                            "objectId": "8ba8abb9cd",
+////                            "sessionToken": "821bea7740c814b88090ed8ae5a417e9"
+////                    }
+////                    try {
+////                        JSONObject jsonObject = new JSONObject(json);
+////                        registerResult.setCreatedAt(jsonObject.getString("createdAt"));
+////                        registerResult.setObjectId(jsonObject.getString("objectId"));
+////                        registerResult.setSessionToken(jsonObject.getString("sessionToken"));
+////                    } catch (JSONException e) {
+////                        e.printStackTrace();
+////                    }
+//
+//                    Log.e("RegisterResult",registerResult.toString());
+//
+//                }else{
+//                    Log.e("aaa","响应失败，响应码=" + response.code());
+//                }
+//            }
+//        });
 
 
     }
